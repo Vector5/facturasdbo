@@ -1,0 +1,36 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Create the complete application structure, configuration files, database schema, authentication system (PIN-based with lockout), and the core includes (header, footer, functions). This establishes the foundation for all other features.",
+  "status": "in_progress",
+  "steps": [
+    "Create the directory structure: facturas/, facturas/config/, facturas/includes/, facturas/admin/, facturas/assets/css/, facturas/assets/js/, facturas/assets/img/, facturas/libs/, facturas/uploads/pdf/",
+    "Create facturas/database.sql with complete schema: tables administradores (id, nombre, pin_hash, fecha_creacion), facturas (id, numero_factura, fecha, nombre_cliente, email, telefono, numero_bodega, periodo_facturado, valor, observaciones, estado, pdf_generado, fecha_creacion), accesos (id, fecha_hora, direccion_ip, resultado, navegador). Include a default admin insert with PIN '1234' hashed with password_hash.",
+    "Create facturas/config/database.php with PDO connection class using configurable host, dbname, user, password constants.",
+    "Create facturas/config/app.php with application settings: APP_NAME, APP_URL, COMPANY_NAME, COMPANY_ADDRESS, COMPANY_PHONE, COMPANY_EMAIL, COMPANY_LOGO, PIN_MAX_ATTEMPTS (5), PIN_LOCKOUT_MINUTES (15), SESSION_TIMEOUT (1800 seconds), INVOICE_PREFIX ('BOD'), PDF_PATH, and timezone setting.",
+    "Create facturas/includes/auth.php with functions: checkSession() - validates session exists and hasn't timed out, requireAuth() - redirects to login if no valid session, verifyPin($pin) - checks against database with password_verify, recordAccess($ip, $result, $browser) - logs access attempt, isLockedOut($ip) - checks if IP has exceeded max attempts within lockout period, logout() - destroys session.",
+    "Create facturas/includes/functions.php with utility functions: generateInvoiceNumber() - generates BOD-YYYY-NNNNN format using current year and auto-increment, formatCurrency($amount) - formats as currency, sanitizeInput($input) - cleans user input, generateValidationUrl($invoiceNumber) - creates verification URL, getStatusBadge($status) - returns Bootstrap badge HTML for invoice status.",
+    "Create facturas/includes/header.php with HTML5 doctype, Bootstrap 5 CSS (CDN link), custom CSS link, responsive meta tags, navigation bar with app name, links to dashboard/facturas/nueva-factura/logout. Include session check.",
+    "Create facturas/includes/footer.php with Bootstrap 5 JS (CDN), custom JS link, closing HTML tags.",
+    "Create facturas/index.php as the PIN login page: elegant full-page centered form with PIN input field, company logo placeholder, submit button. On POST, verify PIN, handle lockout check, record access attempt, create session on success, redirect to admin/dashboard.php. Show error messages styled with Bootstrap alerts.",
+    "Create facturas/logout.php to destroy session and redirect to index.php.",
+    "Create facturas/.htaccess to deny direct access to config/ and includes/ directories, and to enable URL rewriting for the verificar/ routes.",
+    "Create facturas/assets/css/style.css with professional SaaS-style custom CSS: login page styling, sidebar navigation, cards, tables, responsive adjustments, color scheme (professional blues/grays), form styling, button hover effects, badge colors for invoice statuses."
+  ],
+  "acceptance_criteria": [
+    "All PHP files pass syntax check (php -l)",
+    "database.sql contains valid SQL with all three tables and proper column types",
+    "The PIN authentication flow is complete: login page -> verify -> session -> redirect",
+    "Lockout mechanism checks IP-based failed attempts",
+    "Session timeout is implemented (30 minutes inactivity)",
+    "All admin pages are protected by requireAuth() call",
+    ".htaccess blocks direct access to sensitive directories"
+  ],
+  "verification": [
+    "Run: find /projects/sandbox/facturas -name '*.php' -exec php -l {} \\;",
+    "Verify database.sql exists and contains CREATE TABLE statements for all 3 tables",
+    "Verify all core directories exist under /projects/sandbox/facturas/"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

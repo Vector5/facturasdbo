@@ -1,0 +1,30 @@
+{
+  "project_type": "PHP web application (invoice management system for warehouse rentals)",
+  "language": "PHP 8+",
+  "build_system": "None - plain PHP files uploaded to Hostinger shared hosting",
+  "test_framework": "No automated test framework - manual verification via PHP syntax check",
+  "build_command": "find /projects/sandbox/facturas -name '*.php' -exec php -l {} \\;",
+  "test_command": "find /projects/sandbox/facturas -name '*.php' -exec php -l {} \\;",
+  "verification_instructions": "1. Run php -l on all PHP files to verify syntax. 2. Verify directory structure is complete. 3. Verify SQL schema file exists and is valid.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "Upload all files in /projects/sandbox/facturas/ to the hosting root. Import database.sql into MySQL. Configure config/database.php with actual DB credentials. Install DomPDF via composer require dompdf/dompdf. Install PHPMailer via composer require phpmailer/phpmailer.",
+  "environment_constraints": "INTEGRATIONS_ONLY network - cannot download packages. DomPDF and PHPMailer must be stubbed with clear interfaces so user can install them on their Hostinger server. All code must be self-contained. PHP 8.4 available for syntax validation.",
+  "contribution_requirements": "N/A - greenfield project",
+  "key_patterns": "MVC-lite pattern with includes for headers/footers. Bootstrap 5 CDN for styling (will work on Hostinger with internet). PDO for database access. Session-based authentication with PIN.",
+  "relevant_files": [
+    "/projects/sandbox/facturas/index.php",
+    "/projects/sandbox/facturas/config/database.php",
+    "/projects/sandbox/facturas/config/app.php",
+    "/projects/sandbox/facturas/includes/auth.php",
+    "/projects/sandbox/facturas/includes/header.php",
+    "/projects/sandbox/facturas/includes/footer.php",
+    "/projects/sandbox/facturas/admin/dashboard.php",
+    "/projects/sandbox/facturas/admin/facturas.php",
+    "/projects/sandbox/facturas/admin/nueva-factura.php",
+    "/projects/sandbox/facturas/verificar.php",
+    "/projects/sandbox/facturas/database.sql",
+    "/projects/sandbox/facturas/assets/css/style.css",
+    "/projects/sandbox/facturas/assets/js/app.js"
+  ],
+  "directory_structure": "facturas/ - root folder to upload to Hostinger. config/ - database and app configuration. includes/ - shared PHP includes (auth, header, footer, functions). admin/ - all admin panel pages (protected by session). assets/css/ - custom styles. assets/js/ - custom JavaScript. assets/img/ - logo and images. libs/ - stub files for DomPDF and PHPMailer with instructions. uploads/pdf/ - generated PDF storage. verificar/ - public invoice verification page."
+}

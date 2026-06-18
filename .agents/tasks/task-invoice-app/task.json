@@ -1,0 +1,7 @@
+{
+  "task_id": "task-invoice-app",
+  "task_description": "Professional web application for generating invoices and warehouse rental receipts. PHP 8+ with MySQL, Bootstrap 5, DomPDF, PHPMailer. PIN-based security, automatic PDF generation, email sending, invoice verification, and full CRUD with dashboard. Deployed directly to Hostinger via file upload.",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

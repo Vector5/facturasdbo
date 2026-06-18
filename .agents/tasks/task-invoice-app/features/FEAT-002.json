@@ -1,0 +1,35 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Create the admin dashboard, invoice CRUD (create, read, update, delete), invoice listing with search/filter, and the public invoice verification page. This is the core business logic of the application.",
+  "status": "pending",
+  "steps": [
+    "Create facturas/admin/dashboard.php: Include auth check via requireAuth(). Display dashboard cards showing: Total facturado (sum of all paid invoices), Facturas emitidas (total count), Facturas pagadas (count where estado='pagada'), Facturas pendientes (count where estado='pendiente'), Facturas vencidas (count where estado='vencida'). Show monthly income chart data (last 6 months). Show table of last 10 invoices emitted with quick actions. Use Bootstrap 5 grid cards with icons.",
+    "Create facturas/admin/nueva-factura.php: Form with all required fields: numero_factura (auto-generated, shown read-only), fecha (date picker, default today), nombre_cliente, email, telefono, numero_bodega, periodo_facturado, valor, observaciones, estado (dropdown: pendiente/pagada/vencida). On POST: validate all required fields, insert into database, attempt PDF generation (call PDF function which gracefully handles missing DomPDF), attempt email send (call email function which gracefully handles missing PHPMailer), redirect to invoice list with success message.",
+    "Create facturas/admin/facturas.php: Display all invoices in a responsive Bootstrap table with columns: numero_factura, fecha, nombre_cliente, numero_bodega, valor, estado (as colored badge), acciones (view/edit/download PDF/resend email/delete). Include search bar (searches by client name, invoice number, bodega number). Include date range filter. Include status filter dropdown. Include pagination (20 per page). Delete should use a confirmation modal.",
+    "Create facturas/admin/editar-factura.php: Load existing invoice by ID from GET parameter. Pre-fill form with current values. On POST: validate, update database record, regenerate PDF if key fields changed, redirect with success message. Include cancel button back to list.",
+    "Create facturas/admin/ver-factura.php: Display a single invoice in a nicely formatted read-only view showing all fields. Include action buttons: Download PDF, Resend Email, Edit, Back to list.",
+    "Create facturas/admin/eliminar-factura.php: Handle POST delete request. Verify invoice exists. Delete PDF file if exists. Delete database record. Redirect to list with confirmation message.",
+    "Create facturas/admin/reenviar.php: Handle POST request to resend invoice email. Load invoice data, call email sending function, redirect back with status message.",
+    "Create facturas/verificar.php: Public page (no auth required). Accept invoice number from URL (via .htaccess rewrite or GET parameter). Query database for matching invoice. If found: display professional verification page showing invoice details (number, date, client name, bodega, amount, status) with a green checkmark and 'Factura Verificada' message. If not found: display error message 'Factura no encontrada'. Style with Bootstrap, include company branding.",
+    "Create facturas/assets/js/app.js: Include JavaScript for: delete confirmation modals, form validation on the client side, date picker initialization, search/filter form auto-submit on change, session timeout warning (show alert 5 minutes before expiry), currency input formatting."
+  ],
+  "acceptance_criteria": [
+    "All PHP files pass syntax check (php -l)",
+    "Dashboard queries aggregate data correctly (SUM, COUNT with WHERE clauses)",
+    "Invoice creation generates automatic sequential number in BOD-YYYY-NNNNN format",
+    "All form fields from requirements are present in the create/edit forms",
+    "Search functionality queries multiple columns (client, invoice number, bodega)",
+    "Filter by date range uses BETWEEN clause",
+    "Verification page works without authentication and displays invoice info or not-found message",
+    "Delete includes confirmation step and removes associated PDF file",
+    "All admin pages call requireAuth() at the top"
+  ],
+  "verification": [
+    "Run: find /projects/sandbox/facturas -name '*.php' -exec php -l {} \\;",
+    "Verify all admin files exist: dashboard.php, nueva-factura.php, facturas.php, editar-factura.php, ver-factura.php, eliminar-factura.php, reenviar.php",
+    "Verify verificar.php exists and does NOT call requireAuth()"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

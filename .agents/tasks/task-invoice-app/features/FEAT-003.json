@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-003",
+  "type": "feat",
+  "description": "Create the PDF generation module (with DomPDF integration and graceful fallback) and the email sending module (with PHPMailer integration and graceful fallback). Include installation instructions for the user to set up these libraries on Hostinger.",
+  "status": "pending",
+  "steps": [
+    "Create facturas/libs/pdf_generator.php: A class InvoicePDF with method generate($invoiceData) that: 1) Checks if DomPDF autoload exists (vendor/autoload.php), 2) If yes: creates professional HTML template for PDF with company logo, invoice details, QR code placeholder (using a free QR API URL that will resolve on Hostinger), company seal/signature placeholder, styled with inline CSS for PDF rendering, generates PDF and saves to uploads/pdf/BOD-YYYY-NNNNN.pdf, returns file path. 3) If DomPDF not installed: returns false and sets an error message accessible via getError(). The HTML template should include: company header with logo, invoice number, date, client details (name, email, phone), bodega number, period, amount paid, status, observations, validation URL as QR code, and a footer with digital signature/seal area.",
+    "Create facturas/libs/email_sender.php: A class InvoiceEmail with method send($to, $subject, $body, $attachmentPath) that: 1) Checks if PHPMailer autoload exists, 2) If yes: configures SMTP (settings from config/app.php constants: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM_EMAIL, SMTP_FROM_NAME), creates HTML email body with professional template (company branding, invoice summary, payment confirmation message), attaches PDF, sends email, returns true/false. 3) If PHPMailer not installed: returns false and sets error message. Add SMTP configuration constants to config/app.php.",
+    "Create facturas/libs/INSTALL.md with clear step-by-step instructions in Spanish: How to install DomPDF via Composer on Hostinger (SSH access or Hostinger terminal), How to install PHPMailer via Composer, SMTP configuration for Hostinger email or Gmail, How to set up the uploads/pdf directory permissions (755), How to import database.sql via phpMyAdmin on Hostinger.",
+    "Update facturas/admin/nueva-factura.php to call InvoicePDF::generate() after saving invoice and InvoiceEmail::send() after PDF generation, with appropriate error handling and user feedback messages (success/warning if PDF or email failed due to missing library).",
+    "Create facturas/admin/descargar-pdf.php: Serve existing PDF files for download with proper Content-Type and Content-Disposition headers. If PDF doesn't exist, attempt to regenerate it. Requires auth."
+  ],
+  "acceptance_criteria": [
+    "All PHP files pass syntax check (php -l)",
+    "PDF generator gracefully handles missing DomPDF library without fatal errors",
+    "Email sender gracefully handles missing PHPMailer library without fatal errors",
+    "INSTALL.md contains complete instructions in Spanish for Hostinger setup",
+    "PDF template includes all required elements: logo, invoice data, QR placeholder, seal/signature area",
+    "Email template includes professional HTML with company branding",
+    "SMTP configuration constants are added to config/app.php",
+    "descargar-pdf.php properly serves files with correct headers"
+  ],
+  "verification": [
+    "Run: find /projects/sandbox/facturas -name '*.php' -exec php -l {} \\;",
+    "Verify facturas/libs/INSTALL.md exists and contains instructions",
+    "Verify facturas/libs/pdf_generator.php and facturas/libs/email_sender.php exist"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
