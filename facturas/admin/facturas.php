@@ -196,6 +196,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 </a>
                                 <form method="POST" action="reenviar.php" class="d-inline">
                                     <input type="hidden" name="id" value="<?php echo $invoice['id']; ?>">
+                                    <?php echo csrfField(); ?>
                                     <button type="submit" class="btn btn-outline-success" title="Reenviar email">
                                         <i class="bi bi-envelope"></i>
                                     </button>
@@ -256,6 +257,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <form method="POST" action="eliminar-factura.php" id="deleteForm">
                     <input type="hidden" name="id" id="deleteInvoiceId">
+                    <?php echo csrfField(); ?>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Eliminar
                     </button>

@@ -7,12 +7,20 @@ require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../libs/pdf_generator.php';
+require_once __DIR__ . '/../libs/email_sender.php';
 
 requireAuth();
 
 // Solo aceptar POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: facturas.php');
+    exit;
+}
+
+// Validate CSRF token
+if (!validateCsrfToken($_POST['csrf_token'] ?? null)) {
+    header('Location: facturas.php?msg=send_error');
     exit;
 }
 
@@ -35,11 +43,19 @@ if (!$invoice) {
     exit;
 }
 
-// Intentar enviar email
+// Intentar enviar email usando InvoiceEmail class
 $sent = false;
-if (!empty($invoice['email']) && function_exists('sendInvoiceEmail')) {
+if (!empty($invoice['email'])) {
     try {
-        $sent = sendInvoiceEmail($id);
+        $emailSender = new InvoiceEmail();
+        $emailBody = $emailSender->buildInvoiceEmailBody($invoice);
+        $subject = 'Factura ' . $invoice['numero_factura'] . ' - ' . COMPANY_NAME;
+
+        // Check if PDF exists for attachment
+        $pdfPath = PDF_PATH . $invoice['numero_factura'] . '.pdf';
+        $attachment = file_exists($pdfPath) ? $pdfPath : null;
+
+        $sent = $emailSender->send($invoice['email'], $subject, $emailBody, $attachment);
     } catch (\Throwable $e) {
         $sent = false;
     }

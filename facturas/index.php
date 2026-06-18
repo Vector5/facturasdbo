@@ -6,6 +6,7 @@
 require_once __DIR__ . '/config/app.php';
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/functions.php';
 
 // Si ya está autenticado, redirigir al dashboard
 initSession();
@@ -19,31 +20,38 @@ $locked = false;
 
 // Procesar el formulario de login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $pin = $_POST['pin'] ?? '';
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    $browser = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
-
-    // Verificar bloqueo por intentos
-    if (isLockedOut($ip)) {
-        $locked = true;
-        $error = 'Demasiados intentos fallidos. Intente nuevamente en ' . PIN_LOCKOUT_MINUTES . ' minutos.';
+    // Validate CSRF token
+    if (!validateCsrfToken($_POST['csrf_token'] ?? null)) {
+        $error = 'Solicitud no valida. Intente nuevamente.';
     } else {
-        $admin = verifyPin($pin);
+        $pin = $_POST['pin'] ?? '';
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $browser = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
 
-        if ($admin !== false) {
-            // Acceso exitoso
-            recordAccess($ip, 'exitoso', $browser);
-            initSession();
-            $_SESSION['authenticated'] = true;
-            $_SESSION['admin_id'] = $admin['id'];
-            $_SESSION['admin_name'] = $admin['nombre'];
-            $_SESSION['last_activity'] = time();
-            header('Location: admin/dashboard.php');
-            exit;
+        // Verificar bloqueo por intentos
+        if (isLockedOut($ip)) {
+            $locked = true;
+            $error = 'Demasiados intentos fallidos. Intente nuevamente en ' . PIN_LOCKOUT_MINUTES . ' minutos.';
         } else {
-            // Acceso fallido
-            recordAccess($ip, 'fallido', $browser);
-            $error = 'PIN incorrecto. Intente nuevamente.';
+            $admin = verifyPin($pin);
+
+            if ($admin !== false) {
+                // Acceso exitoso
+                recordAccess($ip, 'exitoso', $browser);
+                initSession();
+                // Regenerate session ID to prevent session fixation
+                session_regenerate_id(true);
+                $_SESSION['authenticated'] = true;
+                $_SESSION['admin_id'] = $admin['id'];
+                $_SESSION['admin_name'] = $admin['nombre'];
+                $_SESSION['last_activity'] = time();
+                header('Location: admin/dashboard.php');
+                exit;
+            } else {
+                // Acceso fallido
+                recordAccess($ip, 'fallido', $browser);
+                $error = 'PIN incorrecto. Intente nuevamente.';
+            }
         }
     }
 }
@@ -78,6 +86,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <?php if (!$locked): ?>
         <form method="POST" action="index.php" class="login-form">
+            <?php echo csrfField(); ?>
             <div class="mb-4">
                 <label for="pin" class="form-label fw-semibold">Ingrese su PIN de acceso</label>
                 <div class="input-group input-group-lg">

@@ -57,6 +57,9 @@ CREATE TABLE IF NOT EXISTS `accesos` (
 
 -- -----------------------------------------------------
 -- Insertar administrador por defecto (PIN: 1234)
+-- IMPORTANT: CHANGE THIS immediately after deployment!
+-- Generate a new hash with: php -r "echo password_hash('YOUR_NEW_PIN', PASSWORD_BCRYPT);"
+-- Then UPDATE administradores SET pin_hash = 'new_hash' WHERE id = 1;
 -- -----------------------------------------------------
 INSERT INTO `administradores` (`nombre`, `pin_hash`, `fecha_creacion`) VALUES
 ('Administrador', '$2y$12$0OorEVdmDUyM1yLZx32VE.eUCnOkaHsKUJ4CLicgvtremcKUKGSzC', NOW());

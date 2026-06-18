@@ -21,104 +21,95 @@ $numeroFactura = generateInvoiceNumber();
 
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $numeroFactura = sanitizeInput($_POST['numero_factura'] ?? '');
-    $fecha = sanitizeInput($_POST['fecha'] ?? '');
-    $nombreCliente = sanitizeInput($_POST['nombre_cliente'] ?? '');
-    $email = sanitizeInput($_POST['email'] ?? '');
-    $telefono = sanitizeInput($_POST['telefono'] ?? '');
-    $numeroBodega = sanitizeInput($_POST['numero_bodega'] ?? '');
-    $periodoFacturado = sanitizeInput($_POST['periodo_facturado'] ?? '');
-    $valor = filter_input(INPUT_POST, 'valor', FILTER_VALIDATE_FLOAT);
-    $observaciones = sanitizeInput($_POST['observaciones'] ?? '');
-    $estado = sanitizeInput($_POST['estado'] ?? 'pendiente');
+    // Validate CSRF token
+    if (!validateCsrfToken($_POST['csrf_token'] ?? null)) {
+        $errors[] = 'Solicitud no valida. Intente nuevamente.';
+    } else {
+        // NOTE: Ignore posted numero_factura - regenerate server-side to prevent tampering
+        $fecha = sanitizeInput($_POST['fecha'] ?? '');
+        $nombreCliente = sanitizeInput($_POST['nombre_cliente'] ?? '');
+        $email = sanitizeInput($_POST['email'] ?? '');
+        $telefono = sanitizeInput($_POST['telefono'] ?? '');
+        $numeroBodega = sanitizeInput($_POST['numero_bodega'] ?? '');
+        $periodoFacturado = sanitizeInput($_POST['periodo_facturado'] ?? '');
+        $valor = filter_input(INPUT_POST, 'valor', FILTER_VALIDATE_FLOAT);
+        $observaciones = sanitizeInput($_POST['observaciones'] ?? '');
+        $estado = sanitizeInput($_POST['estado'] ?? 'pendiente');
 
-    // Validaciones
-    if (empty($numeroFactura)) {
-        $errors[] = 'El numero de factura es obligatorio.';
-    }
-    if (empty($fecha)) {
-        $errors[] = 'La fecha es obligatoria.';
-    }
-    if (empty($nombreCliente)) {
-        $errors[] = 'El nombre del cliente es obligatorio.';
-    }
-    if (empty($numeroBodega)) {
-        $errors[] = 'El numero de bodega es obligatorio.';
-    }
-    if (empty($periodoFacturado)) {
-        $errors[] = 'El periodo facturado es obligatorio.';
-    }
-    if ($valor === false || $valor < 0) {
-        $errors[] = 'El valor debe ser un numero valido mayor o igual a cero.';
-    }
-    if (!in_array($estado, ['pendiente', 'pagada', 'vencida'])) {
-        $errors[] = 'El estado seleccionado no es valido.';
-    }
+        // Validaciones
+        if (empty($fecha)) {
+            $errors[] = 'La fecha es obligatoria.';
+        }
+        if (empty($nombreCliente)) {
+            $errors[] = 'El nombre del cliente es obligatorio.';
+        }
+        if (empty($numeroBodega)) {
+            $errors[] = 'El numero de bodega es obligatorio.';
+        }
+        if (empty($periodoFacturado)) {
+            $errors[] = 'El periodo facturado es obligatorio.';
+        }
+        if ($valor === false || $valor < 0) {
+            $errors[] = 'El valor debe ser un numero valido mayor o igual a cero.';
+        }
+        if (!in_array($estado, ['pendiente', 'pagada', 'vencida'])) {
+            $errors[] = 'El estado seleccionado no es valido.';
+        }
 
-    if (empty($errors)) {
-        try {
-            $stmt = $db->prepare("
-                INSERT INTO facturas (numero_factura, fecha, nombre_cliente, email, telefono, numero_bodega, periodo_facturado, valor, observaciones, estado, fecha_creacion)
-                VALUES (:numero_factura, :fecha, :nombre_cliente, :email, :telefono, :numero_bodega, :periodo_facturado, :valor, :observaciones, :estado, NOW())
-            ");
-            $stmt->execute([
-                ':numero_factura'   => $numeroFactura,
-                ':fecha'            => $fecha,
-                ':nombre_cliente'   => $nombreCliente,
-                ':email'            => $email,
-                ':telefono'         => $telefono,
-                ':numero_bodega'    => $numeroBodega,
-                ':periodo_facturado'=> $periodoFacturado,
-                ':valor'            => $valor,
-                ':observaciones'    => $observaciones,
-                ':estado'           => $estado,
-            ]);
+        if (empty($errors)) {
+            try {
+                // Use retry-based insert that regenerates invoice number server-side
+                $insertData = [
+                    'fecha'            => $fecha,
+                    'nombre_cliente'   => $nombreCliente,
+                    'email'            => $email,
+                    'telefono'         => $telefono,
+                    'numero_bodega'    => $numeroBodega,
+                    'periodo_facturado'=> $periodoFacturado,
+                    'valor'            => $valor,
+                    'observaciones'    => $observaciones,
+                    'estado'           => $estado,
+                ];
 
-            $invoiceId = $db->lastInsertId();
+                $result = insertInvoiceWithRetry($insertData);
+                $invoiceId = $result['id'];
+                $numeroFactura = $result['numero_factura'];
 
-            // Preparar datos para PDF y email
-            $invoiceData = [
-                'numero_factura'   => $numeroFactura,
-                'fecha'            => $fecha,
-                'nombre_cliente'   => $nombreCliente,
-                'email'            => $email,
-                'telefono'         => $telefono,
-                'numero_bodega'    => $numeroBodega,
-                'periodo_facturado'=> $periodoFacturado,
-                'valor'            => $valor,
-                'observaciones'    => $observaciones,
-                'estado'           => $estado,
-            ];
+                // Preparar datos para PDF y email
+                $invoiceData = array_merge($insertData, [
+                    'numero_factura' => $numeroFactura,
+                ]);
 
-            $warnings = [];
+                $warnings = [];
 
-            // Intentar generar PDF
-            $pdfGenerator = new InvoicePDF();
-            $pdfPath = $pdfGenerator->generate($invoiceData);
-            if ($pdfPath === false) {
-                $warnings[] = 'PDF no generado: ' . $pdfGenerator->getError();
-            }
-
-            // Intentar enviar email si hay direccion de correo
-            if (!empty($email)) {
-                $emailSender = new InvoiceEmail();
-                $emailBody = $emailSender->buildInvoiceEmailBody($invoiceData);
-                $subject = 'Factura ' . $numeroFactura . ' - ' . COMPANY_NAME;
-                $sent = $emailSender->send($email, $subject, $emailBody, $pdfPath ?: null);
-                if (!$sent) {
-                    $warnings[] = 'Correo no enviado: ' . $emailSender->getError();
+                // Intentar generar PDF
+                $pdfGenerator = new InvoicePDF();
+                $pdfPath = $pdfGenerator->generate($invoiceData);
+                if ($pdfPath === false) {
+                    $warnings[] = 'PDF no generado: ' . $pdfGenerator->getError();
                 }
-            }
 
-            // Guardar advertencias en sesion si las hay
-            if (!empty($warnings)) {
-                $_SESSION['invoice_warnings'] = $warnings;
-            }
+                // Intentar enviar email si hay direccion de correo
+                if (!empty($email)) {
+                    $emailSender = new InvoiceEmail();
+                    $emailBody = $emailSender->buildInvoiceEmailBody($invoiceData);
+                    $subject = 'Factura ' . $numeroFactura . ' - ' . COMPANY_NAME;
+                    $sent = $emailSender->send($email, $subject, $emailBody, $pdfPath ?: null);
+                    if (!$sent) {
+                        $warnings[] = 'Correo no enviado: ' . $emailSender->getError();
+                    }
+                }
 
-            header('Location: facturas.php?msg=created');
-            exit;
-        } catch (PDOException $e) {
-            $errors[] = 'Error al guardar la factura: ' . $e->getMessage();
+                // Guardar advertencias en sesion si las hay
+                if (!empty($warnings)) {
+                    $_SESSION['invoice_warnings'] = $warnings;
+                }
+
+                header('Location: facturas.php?msg=created');
+                exit;
+            } catch (PDOException $e) {
+                $errors[] = 'Error al guardar la factura: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -156,6 +147,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <form method="POST" action="" id="formNuevaFactura" novalidate>
+            <?php echo csrfField(); ?>
             <div class="row g-3">
                 <!-- Numero de Factura -->
                 <div class="col-md-6">

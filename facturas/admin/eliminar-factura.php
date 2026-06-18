@@ -16,6 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Validate CSRF token
+if (!validateCsrfToken($_POST['csrf_token'] ?? null)) {
+    header('Location: facturas.php');
+    exit;
+}
+
 $db = Database::getConnection();
 
 // Obtener ID

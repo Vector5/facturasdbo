@@ -7,6 +7,7 @@ require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../libs/pdf_generator.php';
 
 requireAuth();
 
@@ -32,98 +33,116 @@ if (!$invoice) {
 
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $fecha = sanitizeInput($_POST['fecha'] ?? '');
-    $nombreCliente = sanitizeInput($_POST['nombre_cliente'] ?? '');
-    $email = sanitizeInput($_POST['email'] ?? '');
-    $telefono = sanitizeInput($_POST['telefono'] ?? '');
-    $numeroBodega = sanitizeInput($_POST['numero_bodega'] ?? '');
-    $periodoFacturado = sanitizeInput($_POST['periodo_facturado'] ?? '');
-    $valor = filter_input(INPUT_POST, 'valor', FILTER_VALIDATE_FLOAT);
-    $observaciones = sanitizeInput($_POST['observaciones'] ?? '');
-    $estado = sanitizeInput($_POST['estado'] ?? 'pendiente');
+    // Validate CSRF token
+    if (!validateCsrfToken($_POST['csrf_token'] ?? null)) {
+        $errors[] = 'Solicitud no valida. Intente nuevamente.';
+    } else {
+        $fecha = sanitizeInput($_POST['fecha'] ?? '');
+        $nombreCliente = sanitizeInput($_POST['nombre_cliente'] ?? '');
+        $email = sanitizeInput($_POST['email'] ?? '');
+        $telefono = sanitizeInput($_POST['telefono'] ?? '');
+        $numeroBodega = sanitizeInput($_POST['numero_bodega'] ?? '');
+        $periodoFacturado = sanitizeInput($_POST['periodo_facturado'] ?? '');
+        $valor = filter_input(INPUT_POST, 'valor', FILTER_VALIDATE_FLOAT);
+        $observaciones = sanitizeInput($_POST['observaciones'] ?? '');
+        $estado = sanitizeInput($_POST['estado'] ?? 'pendiente');
 
-    // Validaciones
-    if (empty($fecha)) {
-        $errors[] = 'La fecha es obligatoria.';
-    }
-    if (empty($nombreCliente)) {
-        $errors[] = 'El nombre del cliente es obligatorio.';
-    }
-    if (empty($numeroBodega)) {
-        $errors[] = 'El numero de bodega es obligatorio.';
-    }
-    if (empty($periodoFacturado)) {
-        $errors[] = 'El periodo facturado es obligatorio.';
-    }
-    if ($valor === false || $valor < 0) {
-        $errors[] = 'El valor debe ser un numero valido mayor o igual a cero.';
-    }
-    if (!in_array($estado, ['pendiente', 'pagada', 'vencida', 'anulada'])) {
-        $errors[] = 'El estado seleccionado no es valido.';
-    }
-
-    if (empty($errors)) {
-        try {
-            // Detectar si campos clave cambiaron (para regenerar PDF)
-            $keyFieldsChanged = (
-                $invoice['nombre_cliente'] !== $nombreCliente ||
-                $invoice['valor'] != $valor ||
-                $invoice['numero_bodega'] !== $numeroBodega ||
-                $invoice['periodo_facturado'] !== $periodoFacturado
-            );
-
-            $stmt = $db->prepare("
-                UPDATE facturas SET
-                    fecha = :fecha,
-                    nombre_cliente = :nombre_cliente,
-                    email = :email,
-                    telefono = :telefono,
-                    numero_bodega = :numero_bodega,
-                    periodo_facturado = :periodo_facturado,
-                    valor = :valor,
-                    observaciones = :observaciones,
-                    estado = :estado
-                WHERE id = :id
-            ");
-            $stmt->execute([
-                ':fecha'            => $fecha,
-                ':nombre_cliente'   => $nombreCliente,
-                ':email'            => $email,
-                ':telefono'         => $telefono,
-                ':numero_bodega'    => $numeroBodega,
-                ':periodo_facturado'=> $periodoFacturado,
-                ':valor'            => $valor,
-                ':observaciones'    => $observaciones,
-                ':estado'           => $estado,
-                ':id'               => $id,
-            ]);
-
-            // Regenerar PDF si campos clave cambiaron
-            if ($keyFieldsChanged && function_exists('generateInvoicePdf')) {
-                try {
-                    generateInvoicePdf($id);
-                } catch (\Throwable $e) {
-                    // PDF generation not available
-                }
-            }
-
-            header('Location: facturas.php?msg=updated');
-            exit;
-        } catch (PDOException $e) {
-            $errors[] = 'Error al actualizar la factura: ' . $e->getMessage();
+        // Validaciones
+        if (empty($fecha)) {
+            $errors[] = 'La fecha es obligatoria.';
         }
-    }
+        if (empty($nombreCliente)) {
+            $errors[] = 'El nombre del cliente es obligatorio.';
+        }
+        if (empty($numeroBodega)) {
+            $errors[] = 'El numero de bodega es obligatorio.';
+        }
+        if (empty($periodoFacturado)) {
+            $errors[] = 'El periodo facturado es obligatorio.';
+        }
+        if ($valor === false || $valor < 0) {
+            $errors[] = 'El valor debe ser un numero valido mayor o igual a cero.';
+        }
+        if (!in_array($estado, ['pendiente', 'pagada', 'vencida', 'anulada'])) {
+            $errors[] = 'El estado seleccionado no es valido.';
+        }
 
-    // Recargar datos del formulario con lo enviado
-    $invoice['fecha'] = $fecha;
-    $invoice['nombre_cliente'] = $nombreCliente;
-    $invoice['email'] = $email;
-    $invoice['telefono'] = $telefono;
-    $invoice['numero_bodega'] = $numeroBodega;
-    $invoice['periodo_facturado'] = $periodoFacturado;
-    $invoice['valor'] = $valor;
-    $invoice['observaciones'] = $observaciones;
-    $invoice['estado'] = $estado;
+        if (empty($errors)) {
+            try {
+                // Detectar si campos clave cambiaron (para regenerar PDF)
+                $keyFieldsChanged = (
+                    $invoice['nombre_cliente'] !== $nombreCliente ||
+                    $invoice['valor'] != $valor ||
+                    $invoice['numero_bodega'] !== $numeroBodega ||
+                    $invoice['periodo_facturado'] !== $periodoFacturado
+                );
+
+                $stmt = $db->prepare("
+                    UPDATE facturas SET
+                        fecha = :fecha,
+                        nombre_cliente = :nombre_cliente,
+                        email = :email,
+                        telefono = :telefono,
+                        numero_bodega = :numero_bodega,
+                        periodo_facturado = :periodo_facturado,
+                        valor = :valor,
+                        observaciones = :observaciones,
+                        estado = :estado
+                    WHERE id = :id
+                ");
+                $stmt->execute([
+                    ':fecha'            => $fecha,
+                    ':nombre_cliente'   => $nombreCliente,
+                    ':email'            => $email,
+                    ':telefono'         => $telefono,
+                    ':numero_bodega'    => $numeroBodega,
+                    ':periodo_facturado'=> $periodoFacturado,
+                    ':valor'            => $valor,
+                    ':observaciones'    => $observaciones,
+                    ':estado'           => $estado,
+                    ':id'               => $id,
+                ]);
+
+                // Regenerar PDF si campos clave cambiaron using InvoicePDF class
+                if ($keyFieldsChanged) {
+                    try {
+                        $pdfGenerator = new InvoicePDF();
+                        $updatedData = [
+                            'numero_factura'   => $invoice['numero_factura'],
+                            'fecha'            => $fecha,
+                            'nombre_cliente'   => $nombreCliente,
+                            'email'            => $email,
+                            'telefono'         => $telefono,
+                            'numero_bodega'    => $numeroBodega,
+                            'periodo_facturado'=> $periodoFacturado,
+                            'valor'            => $valor,
+                            'observaciones'    => $observaciones,
+                            'estado'           => $estado,
+                        ];
+                        $pdfGenerator->generate($updatedData);
+                    } catch (\Throwable $e) {
+                        // PDF generation not available - non-fatal
+                    }
+                }
+
+                header('Location: facturas.php?msg=updated');
+                exit;
+            } catch (PDOException $e) {
+                $errors[] = 'Error al actualizar la factura: ' . $e->getMessage();
+            }
+        }
+
+        // Recargar datos del formulario con lo enviado
+        $invoice['fecha'] = $fecha;
+        $invoice['nombre_cliente'] = $nombreCliente;
+        $invoice['email'] = $email;
+        $invoice['telefono'] = $telefono;
+        $invoice['numero_bodega'] = $numeroBodega;
+        $invoice['periodo_facturado'] = $periodoFacturado;
+        $invoice['valor'] = $valor;
+        $invoice['observaciones'] = $observaciones;
+        $invoice['estado'] = $estado;
+    }
 }
 
 $pageTitle = 'Editar Factura - ' . APP_NAME;
@@ -159,6 +178,7 @@ require_once __DIR__ . '/../includes/header.php';
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <form method="POST" action="editar-factura.php?id=<?php echo $id; ?>" id="formEditarFactura" novalidate>
+            <?php echo csrfField(); ?>
             <div class="row g-3">
                 <!-- Numero de Factura -->
                 <div class="col-md-6">

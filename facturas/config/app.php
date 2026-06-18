@@ -6,7 +6,7 @@
 
 // Nombre de la aplicación
 define('APP_NAME', 'Sistema de Facturación');
-define('APP_URL', 'https://tudominio.com/facturas');
+define('APP_URL', 'https://tudominio.com/facturas'); // CHANGE THIS: Set your actual domain
 
 // Datos de la empresa
 define('COMPANY_NAME', 'Bodega de Almacenes');
@@ -27,11 +27,12 @@ define('INVOICE_PREFIX', 'BOD');
 define('PDF_PATH', __DIR__ . '/../uploads/pdf/');
 
 // Configuracion SMTP para envio de correos
+// CHANGE THESE: Replace with your actual SMTP credentials before deployment
 define('SMTP_HOST', 'smtp.hostinger.com');
 define('SMTP_PORT', 465);
-define('SMTP_USER', 'facturacion@tudominio.com');
-define('SMTP_PASS', 'tu_contraseña_smtp');
-define('SMTP_FROM_EMAIL', 'facturacion@tudominio.com');
+define('SMTP_USER', 'facturacion@tudominio.com');      // CHANGE THIS
+define('SMTP_PASS', 'tu_contraseña_smtp');              // CHANGE THIS
+define('SMTP_FROM_EMAIL', 'facturacion@tudominio.com'); // CHANGE THIS
 define('SMTP_FROM_NAME', 'Bodega de Almacenes');
 
 // Zona horaria
