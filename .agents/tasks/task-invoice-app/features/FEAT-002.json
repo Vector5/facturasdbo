@@ -2,7 +2,7 @@
   "id": "FEAT-002",
   "type": "feat",
   "description": "Create the admin dashboard, invoice CRUD (create, read, update, delete), invoice listing with search/filter, and the public invoice verification page. This is the core business logic of the application.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create facturas/admin/dashboard.php: Include auth check via requireAuth(). Display dashboard cards showing: Total facturado (sum of all paid invoices), Facturas emitidas (total count), Facturas pagadas (count where estado='pagada'), Facturas pendientes (count where estado='pendiente'), Facturas vencidas (count where estado='vencida'). Show monthly income chart data (last 6 months). Show table of last 10 invoices emitted with quick actions. Use Bootstrap 5 grid cards with icons.",
     "Create facturas/admin/nueva-factura.php: Form with all required fields: numero_factura (auto-generated, shown read-only), fecha (date picker, default today), nombre_cliente, email, telefono, numero_bodega, periodo_facturado, valor, observaciones, estado (dropdown: pendiente/pagada/vencida). On POST: validate all required fields, insert into database, attempt PDF generation (call PDF function which gracefully handles missing DomPDF), attempt email send (call email function which gracefully handles missing PHPMailer), redirect to invoice list with success message.",
@@ -31,5 +31,5 @@
     "Verify verificar.php exists and does NOT call requireAuth()"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All 9 PHP files pass syntax validation. All admin pages call requireAuth(). verificar.php is public (no auth). DomPDF and PHPMailer calls are wrapped in function_exists() checks with try/catch for graceful degradation. The facturas.php search queries multiple columns (nombre_cliente, numero_factura, numero_bodega) and date range uses comparison operators. Delete uses POST with confirmation modal."
 }
