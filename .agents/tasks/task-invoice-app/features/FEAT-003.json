@@ -2,7 +2,7 @@
   "id": "FEAT-003",
   "type": "feat",
   "description": "Create the PDF generation module (with DomPDF integration and graceful fallback) and the email sending module (with PHPMailer integration and graceful fallback). Include installation instructions for the user to set up these libraries on Hostinger.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create facturas/libs/pdf_generator.php: A class InvoicePDF with method generate($invoiceData) that: 1) Checks if DomPDF autoload exists (vendor/autoload.php), 2) If yes: creates professional HTML template for PDF with company logo, invoice details, QR code placeholder (using a free QR API URL that will resolve on Hostinger), company seal/signature placeholder, styled with inline CSS for PDF rendering, generates PDF and saves to uploads/pdf/BOD-YYYY-NNNNN.pdf, returns file path. 3) If DomPDF not installed: returns false and sets an error message accessible via getError(). The HTML template should include: company header with logo, invoice number, date, client details (name, email, phone), bodega number, period, amount paid, status, observations, validation URL as QR code, and a footer with digital signature/seal area.",
     "Create facturas/libs/email_sender.php: A class InvoiceEmail with method send($to, $subject, $body, $attachmentPath) that: 1) Checks if PHPMailer autoload exists, 2) If yes: configures SMTP (settings from config/app.php constants: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM_EMAIL, SMTP_FROM_NAME), creates HTML email body with professional template (company branding, invoice summary, payment confirmation message), attaches PDF, sends email, returns true/false. 3) If PHPMailer not installed: returns false and sets error message. Add SMTP configuration constants to config/app.php.",
@@ -26,5 +26,5 @@
     "Verify facturas/libs/pdf_generator.php and facturas/libs/email_sender.php exist"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All PHP files pass syntax validation. PDF generator uses DomPDF with graceful fallback. Email sender uses PHPMailer with graceful fallback. SMTP constants added to config/app.php. nueva-factura.php now uses class-based InvoicePDF and InvoiceEmail with warning messages stored in session. descargar-pdf.php handles PDF download with regeneration fallback. INSTALL.md provides complete Spanish-language instructions for Hostinger setup."
 }
