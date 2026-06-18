@@ -87,6 +87,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdfPath = $pdfGenerator->generate($invoiceData);
                 if ($pdfPath === false) {
                     $warnings[] = 'PDF no generado: ' . $pdfGenerator->getError();
+                } else {
+                    // Marcar PDF como generado en la base de datos
+                    $stmtPdf = $db->prepare("UPDATE facturas SET pdf_generado = 1 WHERE id = :id");
+                    $stmtPdf->execute([':id' => $invoiceId]);
                 }
 
                 // Intentar enviar email si hay direccion de correo
@@ -137,7 +141,7 @@ require_once __DIR__ . '/../includes/header.php';
     <strong><i class="bi bi-exclamation-triangle me-2"></i>Error:</strong>
     <ul class="mb-0 mt-2">
         <?php foreach ($errors as $error): ?>
-        <li><?php echo $error; ?></li>
+        <li><?php echo htmlspecialchars($error); ?></li>
         <?php endforeach; ?>
     </ul>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
