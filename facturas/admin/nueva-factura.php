@@ -7,6 +7,8 @@ require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../libs/pdf_generator.php';
+require_once __DIR__ . '/../libs/email_sender.php';
 
 requireAuth();
 
@@ -74,22 +76,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $invoiceId = $db->lastInsertId();
 
-            // Intentar generar PDF (gracefully handle missing DomPDF)
-            if (function_exists('generateInvoicePdf')) {
-                try {
-                    generateInvoicePdf($invoiceId);
-                } catch (\Throwable $e) {
-                    // PDF generation not available
+            // Preparar datos para PDF y email
+            $invoiceData = [
+                'numero_factura'   => $numeroFactura,
+                'fecha'            => $fecha,
+                'nombre_cliente'   => $nombreCliente,
+                'email'            => $email,
+                'telefono'         => $telefono,
+                'numero_bodega'    => $numeroBodega,
+                'periodo_facturado'=> $periodoFacturado,
+                'valor'            => $valor,
+                'observaciones'    => $observaciones,
+                'estado'           => $estado,
+            ];
+
+            $warnings = [];
+
+            // Intentar generar PDF
+            $pdfGenerator = new InvoicePDF();
+            $pdfPath = $pdfGenerator->generate($invoiceData);
+            if ($pdfPath === false) {
+                $warnings[] = 'PDF no generado: ' . $pdfGenerator->getError();
+            }
+
+            // Intentar enviar email si hay direccion de correo
+            if (!empty($email)) {
+                $emailSender = new InvoiceEmail();
+                $emailBody = $emailSender->buildInvoiceEmailBody($invoiceData);
+                $subject = 'Factura ' . $numeroFactura . ' - ' . COMPANY_NAME;
+                $sent = $emailSender->send($email, $subject, $emailBody, $pdfPath ?: null);
+                if (!$sent) {
+                    $warnings[] = 'Correo no enviado: ' . $emailSender->getError();
                 }
             }
 
-            // Intentar enviar email (gracefully handle missing PHPMailer)
-            if (!empty($email) && function_exists('sendInvoiceEmail')) {
-                try {
-                    sendInvoiceEmail($invoiceId);
-                } catch (\Throwable $e) {
-                    // Email sending not available
-                }
+            // Guardar advertencias en sesion si las hay
+            if (!empty($warnings)) {
+                $_SESSION['invoice_warnings'] = $warnings;
             }
 
             header('Location: facturas.php?msg=created');

@@ -26,5 +26,13 @@ define('INVOICE_PREFIX', 'BOD');
 // Ruta de almacenamiento de PDFs
 define('PDF_PATH', __DIR__ . '/../uploads/pdf/');
 
+// Configuracion SMTP para envio de correos
+define('SMTP_HOST', 'smtp.hostinger.com');
+define('SMTP_PORT', 465);
+define('SMTP_USER', 'facturacion@tudominio.com');
+define('SMTP_PASS', 'tu_contraseña_smtp');
+define('SMTP_FROM_EMAIL', 'facturacion@tudominio.com');
+define('SMTP_FROM_NAME', 'Bodega de Almacenes');
+
 // Zona horaria
 date_default_timezone_set('America/Mexico_City');

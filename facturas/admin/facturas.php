@@ -99,6 +99,18 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 <?php endif; ?>
 
+<?php if (!empty($_SESSION['invoice_warnings'])): ?>
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong><i class="bi bi-exclamation-triangle me-2"></i>Advertencias:</strong>
+    <ul class="mb-0 mt-2">
+        <?php foreach ($_SESSION['invoice_warnings'] as $warning): ?>
+        <li><?php echo htmlspecialchars($warning); ?></li>
+        <?php endforeach; ?>
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+</div>
+<?php unset($_SESSION['invoice_warnings']); endif; ?>
+
 <!-- Filtros -->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-body">
