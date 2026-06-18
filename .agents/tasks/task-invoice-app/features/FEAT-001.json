@@ -2,7 +2,7 @@
   "id": "FEAT-001",
   "type": "feat",
   "description": "Create the complete application structure, configuration files, database schema, authentication system (PIN-based with lockout), and the core includes (header, footer, functions). This establishes the foundation for all other features.",
-  "status": "in_progress",
+  "status": "completed",
   "steps": [
     "Create the directory structure: facturas/, facturas/config/, facturas/includes/, facturas/admin/, facturas/assets/css/, facturas/assets/js/, facturas/assets/img/, facturas/libs/, facturas/uploads/pdf/",
     "Create facturas/database.sql with complete schema: tables administradores (id, nombre, pin_hash, fecha_creacion), facturas (id, numero_factura, fecha, nombre_cliente, email, telefono, numero_bodega, periodo_facturado, valor, observaciones, estado, pdf_generado, fecha_creacion), accesos (id, fecha_hora, direccion_ip, resultado, navegador). Include a default admin insert with PIN '1234' hashed with password_hash.",
@@ -32,5 +32,5 @@
     "Verify all core directories exist under /projects/sandbox/facturas/"
   ],
   "blocked_reason": null,
-  "findings": ""
+  "findings": "All PHP files pass syntax check. PIN hash for '1234' generated with password_hash(). Admin dashboard placeholder created at admin/dashboard.php with requireAuth() protection. Git initialized at /projects/sandbox/ with master branch. The admin/ directory has a dashboard.php but facturas.php and nueva-factura.php are not yet created (expected in later features)."
 }
