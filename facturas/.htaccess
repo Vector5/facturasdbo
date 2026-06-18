@@ -1,0 +1,41 @@
+# Sistema de Facturación - Bodega de Almacenes
+# Configuración de Apache
+
+# Denegar acceso directo a directorios sensibles
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /facturas/
+
+    # Bloquear acceso a config/
+    RewriteRule ^config/ - [F,L]
+
+    # Bloquear acceso a includes/
+    RewriteRule ^includes/ - [F,L]
+
+    # Bloquear acceso a libs/
+    RewriteRule ^libs/ - [F,L]
+
+    # Reescritura para verificación pública de facturas
+    RewriteRule ^verificar/([A-Za-z0-9\-]+)$ verificar.php?factura=$1 [QSA,L]
+</IfModule>
+
+# Denegar acceso a archivos .sql
+<FilesMatch "\.(sql|log)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Configuración de seguridad de headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Deshabilitar listado de directorios
+Options -Indexes
