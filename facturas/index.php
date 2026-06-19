@@ -70,7 +70,7 @@ require_once __DIR__ . '/includes/header.php';
     <div class="login-card">
         <div class="login-header">
             <div class="login-logo">
-                <i class="bi bi-building"></i>
+                <img src="<?php echo COMPANY_LOGO; ?>" alt="<?php echo htmlspecialchars(COMPANY_NAME); ?>" style="max-height: 120px; width: auto;">
             </div>
             <h1 class="login-title"><?php echo APP_NAME; ?></h1>
             <p class="login-subtitle"><?php echo COMPANY_NAME; ?></p>

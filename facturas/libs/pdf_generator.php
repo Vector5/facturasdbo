@@ -123,6 +123,14 @@ class InvoicePDF
         $companyPhone = COMPANY_PHONE;
         $companyEmail = COMPANY_EMAIL;
 
+        // Ruta absoluta del logo para DomPDF
+        $logoPath = __DIR__ . '/../' . COMPANY_LOGO;
+        $logoHtml = '';
+        if (file_exists($logoPath)) {
+            $logoAbsolute = realpath($logoPath);
+            $logoHtml = '<img src="' . $logoAbsolute . '" style="max-height: 60px; width: auto; margin-bottom: 8px;"><br>';
+        }
+
         $html = <<<HTML
 <!DOCTYPE html>
 <html lang="es">
@@ -313,6 +321,7 @@ class InvoicePDF
             <table class="header-table">
                 <tr>
                     <td style="width: 60%;">
+                        {$logoHtml}
                         <div class="company-name">{$companyName}</div>
                         <div class="company-info">
                             {$companyAddress}<br>

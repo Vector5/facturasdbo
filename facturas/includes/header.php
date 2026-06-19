@@ -26,7 +26,7 @@ $isAuthenticated = isset($_SESSION['authenticated']) && $_SESSION['authenticated
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="<?php echo $baseUrl ?? ''; ?>/admin/dashboard.php">
-            <i class="bi bi-receipt-cutoff me-2"></i><?php echo APP_NAME; ?>
+            <img src="<?php echo ($baseUrl ?? '') . '/' . COMPANY_LOGO; ?>" alt="<?php echo htmlspecialchars(COMPANY_NAME); ?>" style="height: 32px; width: auto;" class="me-2"><?php echo APP_NAME; ?>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
