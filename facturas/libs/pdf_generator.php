@@ -123,12 +123,13 @@ class InvoicePDF
         $companyPhone = COMPANY_PHONE;
         $companyEmail = COMPANY_EMAIL;
 
-        // Ruta absoluta del logo para DomPDF
+        // Logo embebido como base64 para compatibilidad con DomPDF
         $logoPath = __DIR__ . '/../' . COMPANY_LOGO;
         $logoHtml = '';
         if (file_exists($logoPath)) {
-            $logoAbsolute = realpath($logoPath);
-            $logoHtml = '<img src="' . $logoAbsolute . '" style="max-height: 80px; width: auto; margin-bottom: 8px;"><br>';
+            $logoData = base64_encode(file_get_contents($logoPath));
+            $logoMime = mime_content_type($logoPath) ?: 'image/png';
+            $logoHtml = '<img src="data:' . $logoMime . ';base64,' . $logoData . '" style="max-height: 80px; width: auto; margin-bottom: 8px;"><br>';
         }
 
         $html = <<<HTML
