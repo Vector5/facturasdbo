@@ -1,18 +1,21 @@
 <?php
 /**
  * Configuración General de la Aplicación
- * Sistema de Facturación - Bodega de Almacenes
+ * Sistema de Facturación - D-Bodega
  */
 
 // Nombre de la aplicación
 define('APP_NAME', 'Sistema de Facturación');
-define('APP_URL', 'https://tudominio.com/facturas'); // CHANGE THIS: Set your actual domain
+define('APP_URL', 'https://shinyapple.net/facturas');
 
 // Datos de la empresa
-define('COMPANY_NAME', 'Bodega de Almacenes');
-define('COMPANY_ADDRESS', 'Dirección de la empresa');
-define('COMPANY_PHONE', '+00 000 000 0000');
-define('COMPANY_EMAIL', 'info@tudominio.com');
+define('COMPANY_NAME', 'D-Bodega');
+define('COMPANY_ADDRESS', 'Envigado Antióquia');
+define('COMPANY_PHONE', '+57');
+define('COMPANY_EMAIL', '');
+// IMPORTANTE: COMPANY_LOGO debe ser SOLO la ruta al archivo de imagen.
+// NO poner etiquetas HTML aqui (ej: <img src="...">), porque el sistema
+// genera su propia etiqueta <img> y se rompe si ya viene con HTML.
 define('COMPANY_LOGO', 'assets/img/logo.png');
 
 // Configuración de seguridad
@@ -27,13 +30,12 @@ define('INVOICE_PREFIX', 'BOD');
 define('PDF_PATH', __DIR__ . '/../uploads/pdf/');
 
 // Configuracion SMTP para envio de correos
-// CHANGE THESE: Replace with your actual SMTP credentials before deployment
 define('SMTP_HOST', 'smtp.hostinger.com');
 define('SMTP_PORT', 465);
-define('SMTP_USER', 'facturacion@tudominio.com');      // CHANGE THIS
-define('SMTP_PASS', 'tu_contraseña_smtp');              // CHANGE THIS
-define('SMTP_FROM_EMAIL', 'facturacion@tudominio.com'); // CHANGE THIS
-define('SMTP_FROM_NAME', 'Bodega de Almacenes');
+define('SMTP_USER', 'dbodega@shinyapple.net');
+define('SMTP_PASS', 'EaNrN5uL5;');
+define('SMTP_FROM_EMAIL', 'dbodega@shinyapple.net');
+define('SMTP_FROM_NAME', 'D-Bodega');
 
 // Zona horaria
-date_default_timezone_set('America/Mexico_City');
+date_default_timezone_set('America/Bogota');
