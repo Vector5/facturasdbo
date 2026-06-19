@@ -19,14 +19,14 @@ $isAuthenticated = isset($_SESSION['authenticated']) && $_SESSION['authenticated
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="<?php echo $baseUrl ?? ''; ?>/assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo rtrim($baseUrl ?? '', '/') . '/assets/css/style.css'; ?>" rel="stylesheet">
 </head>
 <body>
 <?php if ($isAuthenticated): ?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="<?php echo $baseUrl ?? ''; ?>/admin/dashboard.php">
-            <img src="<?php echo ($baseUrl ?? '') . '/' . COMPANY_LOGO; ?>" alt="<?php echo htmlspecialchars(COMPANY_NAME); ?>" style="height: 32px; width: auto;" class="me-2"><?php echo APP_NAME; ?>
+        <a class="navbar-brand fw-bold" href="<?php echo rtrim($baseUrl ?? '', '/') . '/admin/dashboard.php'; ?>">
+            <img src="<?php echo rtrim($baseUrl ?? '', '/') . '/' . COMPANY_LOGO; ?>" alt="<?php echo htmlspecialchars(COMPANY_NAME); ?>" style="height: 32px; width: auto;" class="me-2" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-block'"><span style="display:none"><i class="bi bi-building me-2"></i></span><?php echo APP_NAME; ?>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -34,24 +34,24 @@ $isAuthenticated = isset($_SESSION['authenticated']) && $_SESSION['authenticated
         <div class="collapse navbar-collapse" id="navbarMain">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $baseUrl ?? ''; ?>/admin/dashboard.php">
+                    <a class="nav-link" href="<?php echo rtrim($baseUrl ?? '', '/') . '/admin/dashboard.php'; ?>">
                         <i class="bi bi-speedometer2 me-1"></i>Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $baseUrl ?? ''; ?>/admin/facturas.php">
+                    <a class="nav-link" href="<?php echo rtrim($baseUrl ?? '', '/') . '/admin/facturas.php'; ?>">
                         <i class="bi bi-file-earmark-text me-1"></i>Facturas
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo $baseUrl ?? ''; ?>/admin/nueva-factura.php">
+                    <a class="nav-link" href="<?php echo rtrim($baseUrl ?? '', '/') . '/admin/nueva-factura.php'; ?>">
                         <i class="bi bi-plus-circle me-1"></i>Nueva Factura
                     </a>
                 </li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link text-light" href="<?php echo $baseUrl ?? ''; ?>/logout.php">
+                    <a class="nav-link text-light" href="<?php echo rtrim($baseUrl ?? '', '/') . '/logout.php'; ?>">
                         <i class="bi bi-box-arrow-right me-1"></i>Salir
                     </a>
                 </li>

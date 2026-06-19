@@ -70,7 +70,8 @@ require_once __DIR__ . '/includes/header.php';
     <div class="login-card">
         <div class="login-header">
             <div class="login-logo">
-                <img src="<?php echo COMPANY_LOGO; ?>" alt="<?php echo htmlspecialchars(COMPANY_NAME); ?>" style="max-height: 120px; width: auto;">
+                <img src="<?php echo COMPANY_LOGO; ?>" alt="<?php echo htmlspecialchars(COMPANY_NAME); ?>" style="max-height: 120px; width: auto;" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='block'">
+                <div id="logo-fallback" style="display:none"><i class="bi bi-building" style="font-size: 4rem; color: #0d6efd;"></i></div>
             </div>
             <h1 class="login-title"><?php echo APP_NAME; ?></h1>
             <p class="login-subtitle"><?php echo COMPANY_NAME; ?></p>
