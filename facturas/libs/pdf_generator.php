@@ -128,7 +128,7 @@ class InvoicePDF
         $logoHtml = '';
         if (file_exists($logoPath)) {
             $logoAbsolute = realpath($logoPath);
-            $logoHtml = '<img src="' . $logoAbsolute . '" style="max-height: 60px; width: auto; margin-bottom: 8px;"><br>';
+            $logoHtml = '<img src="' . $logoAbsolute . '" style="max-height: 80px; width: auto; margin-bottom: 8px;"><br>';
         }
 
         $html = <<<HTML
@@ -322,7 +322,6 @@ class InvoicePDF
                 <tr>
                     <td style="width: 60%;">
                         {$logoHtml}
-                        <div class="company-name">{$companyName}</div>
                         <div class="company-info">
                             {$companyAddress}<br>
                             Tel: {$companyPhone}<br>
